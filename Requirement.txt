@@ -1,0 +1,2 @@
+$env:GOOGLE_API_KEY = "AIzaSyAkQe7UEPgvjUn2HMEw5EXdRX2r7srQuHY"
+pip install -q -U google-generativeai
