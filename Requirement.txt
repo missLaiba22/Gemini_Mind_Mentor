@@ -1,5 +1,3 @@
-google-generativeai==0.4.1
-streamlit
-python-dotenv
-Pillow
-GOOGLE_API_KEY="AIzaSyAkQe7UEPgvjUn2HMEw5EXdRX2r7srQuHY"
+pip install python-dotenv
+pip install streamlit
+pip install google-generativeai
