@@ -12,7 +12,7 @@ The Mind Mentor app is a tool designed to provide mental health support and advi
 ## Installation
 
 1. Clone the repository:
-
+- https://github.com/missLaiba22/Gemini_Mind_Mentor.git
 2. Install dependencies:
 - pip install -r requirements.txt
 
