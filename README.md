@@ -1,7 +1,3 @@
-gcloud builds submit --tag gcr.io/testbed-310521/streamlit-tutorial-youtube --project==testbed-310521
-gcloud run deploy --image gcr.io/testbed--310521/streamlit-tutorial-youtube --platform managed --project==testbed-310521 
- --allow-unauthenticated
-
 # Mind Mentor App
 
 The Mind Mentor app is a tool designed to provide mental health support and advice to users based on their current mood or mental state. It utilizes artificial intelligence powered by Google's Generative AI to generate personalized advice and techniques for managing various mental health issues.
