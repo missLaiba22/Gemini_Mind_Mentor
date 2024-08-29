@@ -2,7 +2,8 @@ import streamlit as st
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
-from PIL import Image  # Import the Image module
+from PIL import Image
+from io import BytesIO
 
 # Load environment variables
 load_dotenv()
@@ -11,13 +12,34 @@ load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Function to get Gemini response
-def get_gemini_response(input_prompt):
-    model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content([input_prompt])
+def get_gemini_response(input_prompt, image_uri=None):
+    model = genai.GenerativeModel('gemini-1.5-pro')
+    
+    if image_uri:
+        # Use image URI in the prompt
+        response = model.generate_content([image_uri, input_prompt])
+    else:
+        # Use text-only prompt
+        response = model.generate_content([input_prompt])
+    
     if hasattr(response, 'parts') and response.parts:
         return response.parts[0].text
     else:
         raise ValueError("Failed to generate a response. Please try again with a different input.")
+
+# Function to upload image and get URI
+def upload_image(image_bytes):
+    # Temporarily save the image to upload
+    with open("temp_image.png", "wb") as temp_file:
+        temp_file.write(image_bytes)
+    
+    # Upload the file and get the URI
+    sample_file = genai.upload_file(path="temp_image.png", display_name="Uploaded Image")
+    
+    # Remove the temporary file
+    os.remove("temp_image.png")
+    
+    return sample_file.uri
 
 # Function for the conversation with Mind Mentor
 def mind_mentor_conversation():
@@ -29,13 +51,41 @@ def mind_mentor_conversation():
         type=("jpg", "jpeg", "png"),
     )
 
-    try:
-        # Display the uploaded image
-        if uploaded_image is not None:
-            image = Image.open(uploaded_image)  # Use Image.open to open the uploaded image
-            st.image(image, caption="Uploaded Image.", use_column_width=True)
-    except Exception as e:
-        st.error(f"Error processing image: {str(e)}")
+    # Take a photo using the camera (optional)
+    camera_image = st.camera_input("Take a photo related to your mood or mental state (optional):")
+
+    if uploaded_image is not None:
+        image = Image.open(uploaded_image)
+        st.image(image, caption="Uploaded Image.", use_column_width=True)
+
+        # Convert image to bytes and upload
+        image_bytes = uploaded_image.read()
+        
+        try:
+            image_uri = upload_image(image_bytes)
+            st.write(f"Image URI: {image_uri}")
+        except Exception as e:
+            st.error(f"Error uploading image: {str(e)}")
+            image_uri = None
+    elif camera_image is not None:
+        if isinstance(camera_image, BytesIO):
+            image = Image.open(camera_image)
+            st.image(image, caption="Captured Image.", use_column_width=True)
+
+            # Convert image to bytes and upload
+            image_bytes = camera_image.getvalue()
+            
+            try:
+                image_uri = upload_image(image_bytes)
+                st.write(f"Image URI: {image_uri}")
+            except Exception as e:
+                st.error(f"Error uploading image: {str(e)}")
+                image_uri = None
+        else:
+            st.error("Unsupported type for camera image.")
+            image_uri = None
+    else:
+        image_uri = None
 
     # Text area for describing current mood or mental state
     input_prompt = st.text_area(
@@ -57,22 +107,19 @@ def mind_mentor_conversation():
             """
         )
 
-        if not input_prompt:
-            st.warning("Please describe your feelings to receive advice.")
+        if not input_prompt and image_uri is None:
+            st.warning("Please describe your feelings or upload an image to receive advice.")
             return
 
-        if uploaded_image is not None:
-            prompt = f"You are a trained therapist. Analyze the user's mood based on the image and the provided description (optional). Offer supportive advice and techniques for managing their current state."
+        if image_uri:
+            prompt = f"Analyze the user's mood based on the image provided and the description: {input_prompt}. Offer supportive advice and techniques for managing their current state."
         else:
-            prompt = f"You are a trained therapist. The user describes their mood or mental state as: {input_prompt}. Offer supportive advice and techniques for managing their current state."
+            prompt = f"The user describes their mood or mental state as: {input_prompt}. Offer supportive advice and techniques for managing their current state."
 
         try:
-            if uploaded_image is not None:
-                response = get_gemini_response(input_prompt)
-                st.header("Mind Mentor's Advice:")
-                st.write(response)
-            else:
-                st.warning("Please upload an image related to your mood or mental state.")
+            response = get_gemini_response(prompt, image_uri)
+            st.header("Mind Mentor's Advice:")
+            st.write(response)
         except ValueError as e:
             st.error(str(e))
 

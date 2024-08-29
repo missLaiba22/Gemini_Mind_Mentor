@@ -1,1 +1,60 @@
-node_modules/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment folder
+venv/
+ENV/
+env/
+
+# Streamlit Cache
+.streamlit/
+
+# API keys and credentials
+.env
+*.env
+
+# Logs and local databases
+*.log
+*.sqlite3
+*.db
+*.sqlite
+*.pdb
+*.pid
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+
+# macOS files
+.DS_Store
+
+# VSCode settings
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+
+# Testing outputs
+coverage/
+htmlcov/
+.tox/
+.nox/
+*.cover
+*.py,cover
+.hypothesis/
+
+# pytest cache
+.pytest_cache/
+
+# Cache files
+*.cache
+*.mypy_cache/
